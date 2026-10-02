@@ -1,0 +1,19 @@
+import type {Metadata} from "next";
+import "./globals.css";
+import {Header} from "@/components/Header";
+import {Footer} from "@/components/Footer";
+import {Support} from "@/components/Support";
+import {JsonLd} from "@/components/JsonLd";
+import {site} from "@/lib/site";
+
+export const metadata: Metadata = {
+  metadataBase:new URL(site.url),
+  title:{default:"Forum development, migrations & support | nextgen solutions",template:"%s | nextgen solutions"},
+  description:site.description,
+  alternates:{canonical:"/"},
+  openGraph:{type:"website",siteName:site.name,title:"nextgen solutions",description:site.description,url:site.url,images:["/assets/images/og-default.png"]},
+  twitter:{card:"summary_large_image",title:"nextgen solutions",description:site.description,images:["/assets/images/og-default.png"]},
+  icons:{icon:"/assets/favicon/favicon.ico",apple:"/assets/favicon/apple-touch-icon.png"}
+};
+
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" suppressHydrationWarning><body><JsonLd data={{"@context":"https://schema.org","@type":"Organization",name:site.name,url:site.url,sameAs:[site.github]}}/><Header/><main>{children}</main><Footer/><Support/></body></html>}
