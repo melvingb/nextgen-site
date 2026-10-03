@@ -29,19 +29,8 @@ export function getPublishingBranch() {
   return process.env.VERCEL_ENV === "preview" ? "feat/admin-auth" : "main";
 }
 
-function getPrivateKey() {
-  const encoded = process.env.GITHUB_APP_PRIVATE_KEY_BASE64?.trim();
-  let raw = encoded
-    ? Buffer.from(encoded, "base64").toString("utf8")
-    : process.env.GITHUB_APP_PRIVATE_KEY?.trim() ?? "";
-
-  if (!raw) {
-    throw new Error(
-      "GitHub App private key is not configured. Set GITHUB_APP_PRIVATE_KEY_BASE64 (recommended) or GITHUB_APP_PRIVATE_KEY."
-    );
-  }
-
-  raw = raw
+function normalizePem(raw: string) {
+  let value = raw
     .replace(/^\uFEFF/, "")
     .replace(/\\r\\n/g, "\n")
     .replace(/\\n/g, "\n")
@@ -49,15 +38,41 @@ function getPrivateKey() {
     .trim();
 
   if (
-    (raw.startsWith('"') && raw.endsWith('"')) ||
-    (raw.startsWith("'") && raw.endsWith("'"))
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
   ) {
-    raw = raw.slice(1, -1).trim();
+    value = value.slice(1, -1).trim();
   }
+
+  return value;
+}
+
+function getPrivateKey() {
+  const configuredBase64 = process.env.GITHUB_APP_PRIVATE_KEY_BASE64?.trim();
+  const configuredPem = process.env.GITHUB_APP_PRIVATE_KEY?.trim();
+
+  if (!configuredBase64 && !configuredPem) {
+    throw new Error(
+      "GitHub App private key is not configured. Set GITHUB_APP_PRIVATE_KEY_BASE64 (recommended) or GITHUB_APP_PRIVATE_KEY."
+    );
+  }
+
+  let raw = "";
+
+  if (configuredBase64) {
+    // Be forgiving if the full PEM was pasted into the BASE64 variable by mistake.
+    raw = configuredBase64.includes("-----BEGIN")
+      ? configuredBase64
+      : Buffer.from(configuredBase64.replace(/\s+/g, ""), "base64").toString("utf8");
+  } else {
+    raw = configuredPem ?? "";
+  }
+
+  raw = normalizePem(raw);
 
   if (!raw.includes("-----BEGIN") || !raw.includes("PRIVATE KEY-----")) {
     throw new Error(
-      "GitHub App private key is not a PEM key. Do not use the SHA256 fingerprint, Client Secret, App ID, or Installation ID."
+      "GitHub App private key value is invalid. GITHUB_APP_PRIVATE_KEY_BASE64 must be the base64 of the downloaded .pem file, not the SHA256 fingerprint, Client Secret, App ID, or Installation ID."
     );
   }
 
@@ -65,7 +80,7 @@ function getPrivateKey() {
     return createPrivateKey({ key: raw, format: "pem" });
   } catch {
     throw new Error(
-      "GitHub App private key could not be decoded. Re-encode the downloaded .pem file as base64 and set GITHUB_APP_PRIVATE_KEY_BASE64."
+      "GitHub App private key contains PEM markers but Node could not decode it. Generate a fresh GitHub App private key and encode that .pem file as base64."
     );
   }
 }
