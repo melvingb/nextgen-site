@@ -76,7 +76,6 @@ export function Header() {
       <header className="site-header">
         <div className="nav-shell">
           <Link className="brand" href="/" onClick={() => setOpen(false)}>
-            <span className="brand-mark">N</span>
             <span className="brand-copy">nextgen <b>solutions</b></span>
           </Link>
 
