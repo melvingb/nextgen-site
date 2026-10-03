@@ -4,7 +4,10 @@ import { auth, signOut } from "@/auth";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  const adminSession = session as (typeof session & { isAdmin?: boolean }) | null;
+
   if (!session?.user) redirect("/admin/login");
+  if (!adminSession?.isAdmin) redirect("/admin/login?error=AccessDenied");
 
   return (
     <div className="admin-shell">
