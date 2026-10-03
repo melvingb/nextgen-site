@@ -8,7 +8,7 @@ export type MediaLibraryFile = {
   name: string;
   size: number;
   deletable: boolean;
-  source: "site" | "upload";
+  source: "site" | "repository-upload" | "blob";
 };
 
 type Props = {
@@ -16,6 +16,12 @@ type Props = {
   onSelect: (path: string) => void;
   onClose: () => void;
 };
+
+function sourceLabel(source: MediaLibraryFile["source"]) {
+  if (source === "blob") return "Vercel Blob";
+  if (source === "repository-upload") return "GitHub upload";
+  return "Site asset";
+}
 
 export function MediaPicker({ current, onSelect, onClose }: Props) {
   const [files, setFiles] = useState<MediaLibraryFile[]>([]);
@@ -34,7 +40,9 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
       })
       .catch((reason) => {
         if (active) {
-          setError(reason instanceof Error ? reason.message : "Could not load media.");
+          setError(
+            reason instanceof Error ? reason.message : "Could not load media."
+          );
         }
       })
       .finally(() => {
@@ -56,13 +64,18 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return files;
+
     return files.filter((file) =>
       `${file.name} ${file.publicPath}`.toLowerCase().includes(needle)
     );
   }, [files, query]);
 
   return (
-    <div className="admin-media-picker-backdrop" role="presentation" onMouseDown={onClose}>
+    <div
+      className="admin-media-picker-backdrop"
+      role="presentation"
+      onMouseDown={onClose}
+    >
       <section
         className="admin-media-picker"
         role="dialog"
@@ -75,7 +88,9 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
             <span className="admin-eyebrow">Media library</span>
             <h2>Choose an image</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close image picker">×</button>
+          <button type="button" onClick={onClose} aria-label="Close image picker">
+            ×
+          </button>
         </div>
 
         <div className="admin-media-picker-toolbar">
@@ -86,7 +101,9 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <a href="/admin/media" target="_blank" rel="noreferrer">Open Media ↗</a>
+          <a href="/admin/media" target="_blank" rel="noreferrer">
+            Open Media ↗
+          </a>
         </div>
 
         {error && <div className="admin-flash error">{error}</div>}
@@ -97,7 +114,7 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
             {filtered.map((file) => (
               <button
                 type="button"
-                key={file.path}
+                key={`${file.source}:${file.path}`}
                 className={current === file.publicPath ? "selected" : ""}
                 onClick={() => {
                   onSelect(file.publicPath);
@@ -108,10 +125,12 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
                   <img src={file.publicPath} alt="" />
                 </span>
                 <span className="admin-media-picker-name">{file.name}</span>
-                <small>{file.source === "upload" ? "Admin upload" : "Site asset"}</small>
+                <small>{sourceLabel(file.source)}</small>
               </button>
             ))}
-            {!filtered.length && <p className="admin-empty">No images match that search.</p>}
+            {!filtered.length && (
+              <p className="admin-empty">No images match that search.</p>
+            )}
           </div>
         )}
       </section>

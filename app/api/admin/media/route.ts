@@ -1,13 +1,11 @@
+import { del, list } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-session";
 import {
   deleteRepositoryFile,
   getPublishingBranch,
   listSiteMedia,
-  writeRepositoryBinary,
 } from "@/lib/github-admin";
-
-const MAX_FILE_SIZE = 6 * 1024 * 1024;
 
 async function authorized() {
   return Boolean(await getAdminSession());
@@ -18,16 +16,16 @@ function sameOrigin(request: Request) {
   return !origin || origin === new URL(request.url).origin;
 }
 
-function safeFileName(name: string) {
-  const dot = name.lastIndexOf(".");
-  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : "";
-  const stem = (dot >= 0 ? name.slice(0, dot) : name)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+function blobErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
 
-  return `${stem || "image"}${ext}`;
+  if (
+    /BLOB_STORE_ID|BLOB_READ_WRITE_TOKEN|OIDC|store|token|credential/i.test(message)
+  ) {
+    return "Vercel Blob is not connected to this project yet.";
+  }
+
+  return message || "Could not access Vercel Blob.";
 }
 
 export async function GET() {
@@ -36,56 +34,57 @@ export async function GET() {
   }
 
   try {
-    const files = await listSiteMedia();
-    return NextResponse.json({ files, branch: getPublishingBranch() });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not load media." },
-      { status: 500 }
-    );
-  }
-}
+    const repositoryFiles = (await listSiteMedia()).map((file) => ({
+      ...file,
+      source: file.source === "upload" ? "repository-upload" : "site",
+    }));
 
-export async function POST(request: Request) {
-  if (!(await authorized())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!sameOrigin(request)) {
-    return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
-  }
+    let blobFiles: Array<{
+      path: string;
+      publicPath: string;
+      name: string;
+      size: number;
+      sha: string;
+      deletable: boolean;
+      source: "blob";
+    }> = [];
+    let blobConnected = true;
+    let blobError = "";
 
-  try {
-    const form = await request.formData();
-    const file = form.get("file");
+    try {
+      const result = await list({
+        prefix: "nextgen-media/",
+        limit: 1000,
+      });
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "Choose an image to upload." }, { status: 400 });
+      blobFiles = result.blobs.map((blob) => ({
+        path: blob.pathname,
+        publicPath: blob.url,
+        name: blob.pathname.split("/").pop() || blob.pathname,
+        size: blob.size,
+        sha: blob.etag,
+        deletable: true,
+        source: "blob" as const,
+      }));
+    } catch (error) {
+      blobConnected = false;
+      blobError = blobErrorMessage(error);
     }
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Only image files are allowed." }, { status: 400 });
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: "Images must be 6 MB or smaller." }, { status: 400 });
-    }
 
-    const fileName = safeFileName(file.name);
-    const path = `public/assets/images/uploads/${Date.now()}-${fileName}`;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const result = await writeRepositoryBinary(
-      path,
-      bytes,
-      `media: upload ${fileName} from admin`
-    );
+    const files = [...blobFiles, ...repositoryFiles];
 
     return NextResponse.json({
-      ok: true,
-      path,
-      publicPath: "/" + path.replace(/^public\//, ""),
-      ...result,
+      files,
+      branch: getPublishingBranch(),
+      blobConnected,
+      blobError,
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not upload image." },
+      {
+        error:
+          error instanceof Error ? error.message : "Could not load media.",
+      },
       { status: 500 }
     );
   }
@@ -100,22 +99,56 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as { path?: string };
+    const body = (await request.json()) as {
+      path?: string;
+      source?: "blob" | "repository-upload" | "site";
+    };
+
     const path = body.path?.trim() || "";
 
-    if (!path.startsWith("public/assets/images/uploads/")) {
-      return NextResponse.json({ error: "Only admin uploads can be deleted." }, { status: 400 });
+    if (body.source === "blob") {
+      if (!path.startsWith("nextgen-media/")) {
+        return NextResponse.json(
+          { error: "Invalid Blob media path." },
+          { status: 400 }
+        );
+      }
+
+      await del(path);
+
+      return NextResponse.json({
+        ok: true,
+        changed: true,
+        storage: "blob",
+      });
     }
 
-    const result = await deleteRepositoryFile(
-      path,
-      `media: remove ${path.split("/").pop() || "upload"} from admin`
-    );
+    if (
+      body.source === "repository-upload" &&
+      path.startsWith("public/assets/images/uploads/")
+    ) {
+      const result = await deleteRepositoryFile(
+        path,
+        `media: remove ${path.split("/").pop() || "upload"} from admin`
+      );
 
-    return NextResponse.json({ ok: true, ...result });
+      return NextResponse.json({
+        ok: true,
+        storage: "github",
+        ...result,
+      });
+    }
+
+    return NextResponse.json(
+      { error: "This site asset is read-only in Media." },
+      { status: 400 }
+    );
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not delete image." },
+      {
+        error:
+          error instanceof Error ? error.message : "Could not delete image.",
+      },
       { status: 500 }
     );
   }
