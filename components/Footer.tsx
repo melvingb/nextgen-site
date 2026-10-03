@@ -6,7 +6,6 @@ export function Footer() {
       <div className="shell footer-grid">
         <div className="footer-brand-block">
           <div className="brand footer-brand">
-            <span className="brand-mark">N</span>
             <span className="brand-copy">nextgen <b>solutions</b></span>
           </div>
           <p>Forum engineering, migrations, maintenance and custom development for established online communities.</p>
