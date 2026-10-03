@@ -207,10 +207,22 @@ export async function writeRepositoryFile(
   message: string
 ) {
   const current = await getRepositoryFile(path);
+  const branch = getPublishingBranch();
+
+  if (current?.content === content) {
+    return {
+      changed: false,
+      sha: "",
+      url: "",
+      path,
+      branch,
+    };
+  }
+
   const body: Record<string, string> = {
     message,
     content: Buffer.from(content, "utf8").toString("base64"),
-    branch: getPublishingBranch(),
+    branch,
   };
   if (current?.sha) body.sha = current.sha;
 
@@ -232,10 +244,11 @@ export async function writeRepositoryFile(
   };
 
   return {
+    changed: true,
     sha: data.commit?.sha ?? "",
     url: data.commit?.html_url ?? "",
     path: data.content?.path ?? path,
-    branch: getPublishingBranch(),
+    branch,
   };
 }
 
