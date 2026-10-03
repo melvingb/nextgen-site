@@ -11,8 +11,8 @@ function ThemeIcon({ mode }: { mode: ThemeMode }) {
   if (mode === "light") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="3.5" />
-        <path d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.72 5.28l-1.42 1.42M6.7 17.3l-1.42 1.42M18.72 18.72l-1.42-1.42M6.7 6.7 5.28 5.28" />
+        <circle cx="12" cy="12" r="3.25" />
+        <path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46" />
       </svg>
     );
   }
@@ -20,15 +20,16 @@ function ThemeIcon({ mode }: { mode: ThemeMode }) {
   if (mode === "dark") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M20.25 15.45A8.3 8.3 0 0 1 8.55 3.75 8.75 8.75 0 1 0 20.25 15.45Z" />
+        <path d="M19.6 15.2A7.75 7.75 0 0 1 8.8 4.4a8.25 8.25 0 1 0 10.8 10.8Z" />
+        <path d="m17.9 4.25.38.9.9.38-.9.38-.38.9-.38-.9-.9-.38.9-.38.38-.9Z" />
       </svg>
     );
   }
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="13" rx="2" />
-      <path d="M8 21h8M12 17v4" />
+      <rect x="3.25" y="4.25" width="17.5" height="12.25" rx="2" />
+      <path d="M8.5 20h7M12 16.5V20" />
     </svg>
   );
 }
@@ -56,13 +57,13 @@ export function Header() {
   function apply(value: ThemeMode) {
     setTheme(value);
     localStorage.setItem("theme", value);
-    const dark = value === "dark" || (value === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
-  }
 
-  function cycleTheme() {
-    const index = themeOrder.indexOf(theme);
-    apply(themeOrder[(index + 1) % themeOrder.length]);
+    const dark =
+      value === "dark" ||
+      (value === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
   }
 
   return (
@@ -70,13 +71,15 @@ export function Header() {
       <div className="utility-bar">
         <div className="shell utility-inner">
           <span>Forum engineering · phpBB · XenForo · vBulletin</span>
-          <a href="https://github.com/nextgen-solutions-gt" target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a href="https://github.com/nextgen-solutions-gt" target="_blank" rel="noreferrer">
+            GitHub ↗
+          </a>
         </div>
       </div>
+
       <header className="site-header">
         <div className="nav-shell">
           <Link className="brand" href="/" onClick={() => setOpen(false)}>
-            <span className="brand-mark">N</span>
             <span className="brand-copy">nextgen <b>solutions</b></span>
           </Link>
 
@@ -89,19 +92,30 @@ export function Header() {
           </nav>
 
           <div className="nav-tools">
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={cycleTheme}
-              aria-label={`Theme: ${theme}. Click to change theme.`}
-              title={`Theme: ${theme}`}
-              data-mode={theme}
-            >
-              <ThemeIcon mode={theme} />
-              <span className="theme-toggle-label">{theme}</span>
-            </button>
+            <div className="theme-control" role="group" aria-label="Color theme">
+              {themeOrder.map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={theme === mode ? "active" : ""}
+                  onClick={() => apply(mode)}
+                  aria-label={`Use ${mode} theme`}
+                  aria-pressed={theme === mode}
+                  title={mode === "system" ? "System theme" : `${mode[0].toUpperCase() + mode.slice(1)} theme`}
+                >
+                  <ThemeIcon mode={mode} />
+                </button>
+              ))}
+            </div>
+
             <Link href="/contact" className="nav-contact">Discuss a project</Link>
-            <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle menu">
+
+            <button
+              className="menu-button"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label="Toggle menu"
+            >
               <span /><span />
             </button>
           </div>

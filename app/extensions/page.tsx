@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { extension } from "@/lib/data";
+import { extensions } from "@/lib/data";
 import { SafeImage } from "@/components/SafeImage";
 
 export const metadata: Metadata = {
@@ -20,41 +20,45 @@ export default function Page() {
             <p>Focused phpBB functionality with maintainable code, public history and a clear release lifecycle.</p>
           </div>
           <div className="listing-hero-note">
-            <code>01 project</code>
-            <strong>Actively developed</strong>
-            <span>Public repository · release candidate</span>
+            <code>{String(extensions.length).padStart(2, "0")} {extensions.length === 1 ? "project" : "projects"}</code>
+            <strong>Actively maintained</strong>
+            <span>Public repositories · release lifecycle</span>
           </div>
         </div>
       </section>
 
       <section className="page shell extension-index-section">
-        <article className="extension-product-card">
-          <div className="extension-product-visual">
-            <SafeImage
-              src={extension.image}
-              alt={extension.title}
-              width={1100}
-              height={620}
-              fallback="phpBB Directory interface preview"
-              variant="extension"
-              meta="ext-phpbb-directory / RC4"
-            />
-          </div>
-          <div className="extension-product-copy">
-            <div className="eyebrow">{extension.platform} · {extension.status}</div>
-            <h2>{extension.title}</h2>
-            <p>{extension.description}</p>
-            <dl className="mini-specs">
-              <div><dt>Version</dt><dd>{extension.version}</dd></div>
-              <div><dt>License</dt><dd>Open source</dd></div>
-              <div><dt>Status</dt><dd>{extension.status}</dd></div>
-            </dl>
-            <div className="actions">
-              <Link href={`/extensions/${extension.slug}`} className="button primary">View project</Link>
-              <a href={extension.repoUrl} className="button secondary" target="_blank" rel="noreferrer">Repository ↗</a>
-            </div>
-          </div>
-        </article>
+        <div className="extension-index-grid">
+          {extensions.map((extension) => (
+            <article className="extension-product-card" key={extension.slug}>
+              <div className="extension-product-visual">
+                <SafeImage
+                  src={extension.image}
+                  alt={extension.title}
+                  width={1100}
+                  height={620}
+                  fallback={`${extension.title} interface preview`}
+                  variant="extension"
+                  meta={`${extension.slug} / ${extension.version}`}
+                />
+              </div>
+              <div className="extension-product-copy">
+                <div className="eyebrow">{extension.platform} · {extension.status}</div>
+                <h2>{extension.title}</h2>
+                <p>{extension.description}</p>
+                <dl className="mini-specs">
+                  <div><dt>Version</dt><dd>{extension.version}</dd></div>
+                  <div><dt>License</dt><dd>Open source</dd></div>
+                  <div><dt>Status</dt><dd>{extension.status}</dd></div>
+                </dl>
+                <div className="actions">
+                  <Link href={`/extensions/${extension.slug}`} className="button primary">View project</Link>
+                  <a href={extension.repoUrl} className="button secondary" target="_blank" rel="noreferrer">Repository ↗</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </>
   );

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Alicante Liberal",
+    "description": "Forum modernization and technical work for a Spanish community, including platform customization and responsive presentation.",
+    "image": "/assets/images/portfolio/alicanteliberal.png"
+  },
+  {
+    "name": "Foro Apuestas",
+    "description": "Forum implementation and customization for a sports-betting community with emphasis on usability and maintainability.",
+    "image": "/assets/images/portfolio/foroapuestas.png"
+  }
+]

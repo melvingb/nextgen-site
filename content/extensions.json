@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "phpbb-directory",
+    "title": "phpBB Directory",
+    "description": "A modern, searchable directory extension for phpBB forums.",
+    "image": "/assets/images/extensions/phpbb-directory/cover.png",
+    "platform": "phpBB",
+    "status": "Release candidate",
+    "version": "2.0.0-RC4",
+    "repo": "nextgen-solutions-gt/ext-phpbb-directory",
+    "repoUrl": "https://github.com/nextgen-solutions-gt/ext-phpbb-directory",
+    "download": "https://github.com/nextgen-solutions-gt/ext-phpbb-directory/releases",
+    "features": [
+      "Categories and subcategories",
+      "SEO-friendly URLs",
+      "Permissions system",
+      "Responsive layout",
+      "ACP management"
+    ],
+    "screenshots": [
+      "information.png",
+      "general.png",
+      "category.png",
+      "authorization.png",
+      "add_edit.png",
+      "ajax_comments.png"
+    ]
+  }
+]
