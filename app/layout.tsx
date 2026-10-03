@@ -12,6 +12,25 @@ const adventPro = Advent_Pro({
   display: "swap",
 });
 
+const themeBootstrap = `
+(function () {
+  try {
+    var saved = localStorage.getItem("theme") || "system";
+    var dark =
+      saved === "dark" ||
+      (saved === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  } catch (_) {
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  }
+})();
+`;
+
 export const metadata: Metadata = {
   metadataBase:new URL(site.url),
   title:{default:"Forum development, migrations & support | nextgen solutions",template:"%s | nextgen solutions"},
@@ -25,6 +44,15 @@ export const metadata: Metadata = {
 export default function RootLayout({children}:{children:React.ReactNode}){
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              "html{background:#f4f7fb}html[data-theme='dark']{background:#0b0b0c;color-scheme:dark}html[data-theme='light']{color-scheme:light}",
+          }}
+        />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className={adventPro.variable}>
         <JsonLd data={{"@context":"https://schema.org","@type":"Organization",name:site.name,url:site.url,sameAs:[site.github]}}/>
         <PublicChrome>{children}</PublicChrome>
