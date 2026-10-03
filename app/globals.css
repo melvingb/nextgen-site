@@ -70,10 +70,10 @@ main{min-height:60vh}
 .utility-inner a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.35)}
 .site-header{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--surface) 93%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .nav-shell{width:min(1140px,calc(100% - 44px));height:64px;margin-inline:auto;display:flex;align-items:center;gap:30px}
-.brand{display:inline-flex;align-items:center;gap:9px;margin-right:auto;font-weight:800;letter-spacing:-.025em}
+.brand{display:inline-flex;align-items:center;gap:9px;margin-right:auto;font-family:var(--font-brand),"Advent Pro",sans-serif;font-weight:600;letter-spacing:.012em}
 .brand-mark{display:grid;place-items:center;width:22px;height:22px;border-radius:5px;background:var(--primary);color:#fff;font:800 .72rem/1 var(--mono);box-shadow:0 3px 8px color-mix(in srgb,var(--primary) 25%,transparent)}
-.brand-copy{font-size:.92rem;white-space:nowrap}
-.brand-copy b{color:var(--primary);font-weight:800}
+.brand-copy{font-size:1.08rem;line-height:1;white-space:nowrap}
+.brand-copy b{color:var(--primary);font-weight:600}
 .nav{display:flex;align-items:center;gap:24px;color:var(--muted);font-size:.82rem;font-weight:650}
 .nav a{padding:22px 0 20px;border-bottom:2px solid transparent;transition:color .18s,border-color .18s}
 .nav a:hover{color:var(--text);border-bottom-color:var(--primary)}
@@ -234,7 +234,7 @@ main{min-height:60vh}
 }
 
 @media (max-width:480px){
-  .brand-copy{font-size:.84rem}.hero h1{font-size:2.65rem}.hero-actions .button{width:100%}.hero-stack{gap:6px}.dev-panel{border-radius:8px}.project-grid{gap:12px}.capability-card{padding:22px}.footer-grid{grid-template-columns:1fr}.footer-brand-block{grid-column:auto}.support-fab{right:12px;bottom:12px}.support-layer{padding:8px}.support-panel{padding:20px}
+  .brand-copy{font-size:.98rem}.hero h1{font-size:2.65rem}.hero-actions .button{width:100%}.hero-stack{gap:6px}.dev-panel{border-radius:8px}.project-grid{gap:12px}.capability-card{padding:22px}.footer-grid{grid-template-columns:1fr}.footer-brand-block{grid-column:auto}.support-fab{right:12px;bottom:12px}.support-layer{padding:8px}.support-panel{padding:20px}
 }
 
 /* =========================================================
