@@ -1,4 +1,4 @@
-import { createSign } from "node:crypto";
+import { createPrivateKey, createSign } from "node:crypto";
 import { contentPaths, type ContentKind } from "@/lib/admin-content";
 
 const DEFAULT_REPOSITORY = "melvingb/nextgen-site";
@@ -30,9 +30,44 @@ export function getPublishingBranch() {
 }
 
 function getPrivateKey() {
-  const raw = process.env.GITHUB_APP_PRIVATE_KEY?.trim();
-  if (!raw) throw new Error("GITHUB_APP_PRIVATE_KEY is not configured.");
-  return raw.replace(/\\n/g, "\n");
+  const encoded = process.env.GITHUB_APP_PRIVATE_KEY_BASE64?.trim();
+  let raw = encoded
+    ? Buffer.from(encoded, "base64").toString("utf8")
+    : process.env.GITHUB_APP_PRIVATE_KEY?.trim() ?? "";
+
+  if (!raw) {
+    throw new Error(
+      "GitHub App private key is not configured. Set GITHUB_APP_PRIVATE_KEY_BASE64 (recommended) or GITHUB_APP_PRIVATE_KEY."
+    );
+  }
+
+  raw = raw
+    .replace(/^\uFEFF/, "")
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .trim();
+
+  if (
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"))
+  ) {
+    raw = raw.slice(1, -1).trim();
+  }
+
+  if (!raw.includes("-----BEGIN") || !raw.includes("PRIVATE KEY-----")) {
+    throw new Error(
+      "GitHub App private key is not a PEM key. Do not use the SHA256 fingerprint, Client Secret, App ID, or Installation ID."
+    );
+  }
+
+  try {
+    return createPrivateKey({ key: raw, format: "pem" });
+  } catch {
+    throw new Error(
+      "GitHub App private key could not be decoded. Re-encode the downloaded .pem file as base64 and set GITHUB_APP_PRIVATE_KEY_BASE64."
+    );
+  }
 }
 
 function createAppJwt() {
@@ -319,8 +354,14 @@ export async function getPublishingStatus() {
   const missing = [
     "GITHUB_APP_ID",
     "GITHUB_APP_INSTALLATION_ID",
-    "GITHUB_APP_PRIVATE_KEY",
   ].filter((name) => !process.env[name]?.trim());
+
+  if (
+    !process.env.GITHUB_APP_PRIVATE_KEY_BASE64?.trim() &&
+    !process.env.GITHUB_APP_PRIVATE_KEY?.trim()
+  ) {
+    missing.push("GITHUB_APP_PRIVATE_KEY_BASE64");
+  }
 
   if (missing.length) {
     return {
