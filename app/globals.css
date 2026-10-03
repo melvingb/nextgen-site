@@ -647,3 +647,24 @@ html[data-theme="dark"] .theme-control button.active{
   .github-comments{padding-bottom:70px}
   .github-comments-heading{grid-template-columns:1fr;gap:12px;padding:30px 0 20px}
 }
+
+
+/* Mobile detail hero: keep one continuous background behind copy, actions and media */
+@media (max-width:760px){
+  .project-hero{
+    background:var(--surface);
+  }
+
+  .project-hero::before{
+    display:none;
+  }
+
+  .project-hero-grid,
+  .project-hero-copy{
+    background:transparent;
+  }
+
+  .project-hero-visual{
+    background:var(--surface);
+  }
+}
