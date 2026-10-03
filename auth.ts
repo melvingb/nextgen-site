@@ -3,19 +3,35 @@ import GitHub from "next-auth/providers/github";
 
 const ADMIN_GITHUB_USER_ID = "512772";
 
+const githubClientId = process.env.AUTH_GITHUB_ID?.trim() ?? "";
+const githubClientSecret = process.env.AUTH_GITHUB_SECRET?.trim() ?? "";
+const authSecret = process.env.AUTH_SECRET?.trim() ?? "";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub],
+  trustHost: true,
+  secret: authSecret,
+  providers: [
+    GitHub({
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
+    }),
+  ],
   pages: {
     signIn: "/admin/login",
     error: "/admin/login",
+  },
+  logger: {
+    error(error) {
+      console.error("[nextgen-auth]", error);
+    },
   },
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account?.provider === "github") {
         const githubId = String(
           (profile as { id?: string | number } | undefined)?.id ??
-          account.providerAccountId ??
-          ""
+            account.providerAccountId ??
+            ""
         ).trim();
 
         token.isAdmin = githubId === ADMIN_GITHUB_USER_ID;
