@@ -1,27 +1,73 @@
 import type { Metadata } from "next";
+import { designs, extensions, portfolio, testimonials } from "@/lib/data";
+import { getPublishingStatus } from "@/lib/github-admin";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-const areas = [
-  { title: "Designs", value: "9", note: "phpBB styles" },
-  { title: "Extensions", value: "1", note: "public project" },
-  { title: "Portfolio", value: "2", note: "selected projects" },
-  { title: "Testimonials", value: "10", note: "client reviews" },
-];
+export default async function AdminDashboard() {
+  const publishing = await getPublishingStatus();
+  const areas = [
+    { title: "Designs", value: String(designs.length), note: "phpBB styles" },
+    { title: "Extensions", value: String(extensions.length), note: "public projects" },
+    { title: "Portfolio", value: String(portfolio.length), note: "selected projects" },
+    { title: "Testimonials", value: String(testimonials.length), note: "client reviews" },
+  ];
 
-export default function AdminDashboard() {
   return (
     <main className="admin-content">
       <div className="admin-page-heading">
-        <div><span className="admin-eyebrow">Dashboard</span><h1>Content control, without a traditional CMS.</h1><p>GitHub stays the source of truth. This panel will publish structured changes back to the repository.</p></div>
+        <div>
+          <span className="admin-eyebrow">Dashboard</span>
+          <h1>Content control, without a traditional CMS.</h1>
+          <p>GitHub stays the source of truth. Editing here produces reviewable commits and lets Vercel deploy the result.</p>
+        </div>
         <span className="admin-status"><i /> Authentication active</span>
       </div>
+
       <section className="admin-stat-grid">
-        {areas.map((area) => <article className="admin-stat-card" key={area.title}><span>{area.title}</span><strong>{area.value}</strong><small>{area.note}</small></article>)}
+        {areas.map((area) => (
+          <article className="admin-stat-card" key={area.title}>
+            <span>{area.title}</span>
+            <strong>{area.value}</strong>
+            <small>{area.note}</small>
+          </article>
+        ))}
       </section>
+
       <section className="admin-panel-grid">
-        <article className="admin-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">Next step</span><h2>Connect repository publishing</h2></div><span className="admin-chip">pending</span></div><p>The login is protected first. Next we will add a scoped GitHub token so Save and Publish can create commits in <code>melvingb/nextgen-site</code>.</p></article>
-        <article className="admin-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">Deployment</span><h2>Vercel production</h2></div><span className="admin-chip ok">online</span></div><p>Every published commit on <code>main</code> will trigger the existing Vercel production deployment.</p></article>
+        <article className="admin-panel">
+          <div className="admin-panel-head">
+            <div>
+              <span className="admin-eyebrow">Repository publishing</span>
+              <h2>{publishing.connected ? "GitHub App connected" : "GitHub App setup required"}</h2>
+            </div>
+            <span className={`admin-chip ${publishing.connected ? "ok" : ""}`}>
+              {publishing.connected ? "connected" : "pending"}
+            </span>
+          </div>
+          <p>{publishing.message}</p>
+          <dl className="admin-repo-meta">
+            <div><dt>Repository</dt><dd>{publishing.repository}</dd></div>
+            <div><dt>Branch</dt><dd>{publishing.branch}</dd></div>
+            {!!publishing.missing.length && (
+              <div><dt>Missing</dt><dd>{publishing.missing.join(", ")}</dd></div>
+            )}
+          </dl>
+        </article>
+
+        <article className="admin-panel">
+          <div className="admin-panel-head">
+            <div>
+              <span className="admin-eyebrow">Deployment</span>
+              <h2>Git-backed publishing</h2>
+            </div>
+            <span className="admin-chip ok">online</span>
+          </div>
+          <p>
+            Preview publishes to <code>feat/admin-auth</code>. Production publishes to <code>main</code>.
+            Every commit triggers the matching Vercel deployment automatically.
+          </p>
+        </article>
       </section>
     </main>
   );

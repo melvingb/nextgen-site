@@ -2,13 +2,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/admin-session";
 
+const nav = [
+  ["Overview", "/admin"],
+  ["Designs", "/admin/designs"],
+  ["Extensions", "/admin/extensions"],
+  ["Portfolio", "/admin/portfolio"],
+  ["Testimonials", "/admin/testimonials"],
+  ["Media", "/admin/media"],
+] as const;
+
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getAdminSession();
-
   if (!session) redirect("/admin/login");
 
   return (
@@ -20,12 +28,7 @@ export default async function AdminLayout({
         </Link>
 
         <nav className="admin-nav" aria-label="Admin navigation">
-          <Link href="/admin">Overview</Link>
-          <span>Designs <small>soon</small></span>
-          <span>Extensions <small>soon</small></span>
-          <span>Portfolio <small>soon</small></span>
-          <span>Testimonials <small>soon</small></span>
-          <span>Media <small>soon</small></span>
+          {nav.map(([label, href]) => <Link href={href} key={href}>{label}</Link>)}
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -42,9 +45,7 @@ export default async function AdminLayout({
           </div>
 
           <form action="/api/auth/signout" method="post">
-            <button type="submit" className="admin-signout">
-              Sign out
-            </button>
+            <button type="submit" className="admin-signout">Sign out</button>
           </form>
         </div>
       </aside>
@@ -55,11 +56,8 @@ export default async function AdminLayout({
             <span className="admin-topbar-label">Content workspace</span>
             <strong>nextgen-site</strong>
           </div>
-          <a href="/" target="_blank" rel="noreferrer">
-            View site ↗
-          </a>
+          <a href="/" target="_blank" rel="noreferrer">View site ↗</a>
         </header>
-
         {children}
       </div>
     </div>
