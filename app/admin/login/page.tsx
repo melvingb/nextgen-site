@@ -14,6 +14,13 @@ type Props = {
 const errorMessages: Record<string, string> = {
   AccessDenied: "This GitHub account is not authorized to access the admin.",
   Configuration: "The sign-in service is not configured correctly.",
+  MissingCode: "GitHub did not return an authorization code.",
+  StateMismatch: "The GitHub sign-in state could not be verified. Start the login again.",
+  IncorrectClientCredentials: "GitHub rejected the app credentials. Check the GitHub App Client ID and Client Secret.",
+  RedirectUriMismatch: "GitHub rejected the callback URL. Check the GitHub App redirect URI.",
+  BadVerificationCode: "The GitHub authorization code expired or was already used. Start the login again.",
+  TokenExchange: "GitHub did not issue an access token. Start the login again.",
+  UserLookup: "GitHub authenticated the app, but the user profile could not be loaded.",
   OAuthCallback: "GitHub sign-in did not complete. Please try again.",
 };
 
