@@ -128,10 +128,18 @@ export function AdminCollectionEditor({
 
       setItems(data.items);
       setDirty(false);
-      setMessage({
-        type: "success",
-        text: `Published commit ${String(data.sha || "").slice(0, 7)} to ${data.branch}. Vercel will redeploy automatically.`,
-      });
+
+      if (data.changed === false) {
+        setMessage({
+          type: "success",
+          text: `No changes to publish. ${data.branch} is already up to date.`,
+        });
+      } else {
+        setMessage({
+          type: "success",
+          text: `Published commit ${String(data.sha || "").slice(0, 7)} to ${data.branch}. Vercel will redeploy automatically.`,
+        });
+      }
     } catch (error) {
       setMessage({
         type: "error",
