@@ -38,8 +38,9 @@ export async function GET(request: Request) {
     .find((value) => value.startsWith(`${OAUTH_STATE_COOKIE}=`))
     ?.slice(OAUTH_STATE_COOKIE.length + 1);
 
-  if (!code || !state || !stateCookie || state !== stateCookie) {
-    return loginError(request, "OAuthCallback");
+  if (!code) return loginError(request, "MissingCode");
+  if (!state || !stateCookie || state !== stateCookie) {
+    return loginError(request, "StateMismatch");
   }
 
   const clientId = process.env.AUTH_GITHUB_ID?.trim();
@@ -51,18 +52,20 @@ export async function GET(request: Request) {
 
   const redirectUri = `${url.origin}/api/auth/callback/github`;
 
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    code,
+    redirect_uri: redirectUri,
+  });
+
   const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      redirect_uri: redirectUri,
-    }),
+    body: body.toString(),
     cache: "no-store",
   });
 
@@ -74,14 +77,27 @@ export async function GET(request: Request) {
       error: tokenData.error,
       description: tokenData.error_description,
     });
-    return loginError(request, "OAuthCallback");
+
+    if (tokenData.error === "incorrect_client_credentials") {
+      return loginError(request, "IncorrectClientCredentials");
+    }
+
+    if (tokenData.error === "redirect_uri_mismatch") {
+      return loginError(request, "RedirectUriMismatch");
+    }
+
+    if (tokenData.error === "bad_verification_code") {
+      return loginError(request, "BadVerificationCode");
+    }
+
+    return loginError(request, "TokenExchange");
   }
 
   const userResponse = await fetch("https://api.github.com/user", {
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${tokenData.access_token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      "X-GitHub-Api-Version": "2026-03-10",
       "User-Agent": "nextgen-site-admin",
     },
     cache: "no-store",
@@ -91,7 +107,7 @@ export async function GET(request: Request) {
     console.error("[nextgen-oauth] user lookup failed", {
       status: userResponse.status,
     });
-    return loginError(request, "OAuthCallback");
+    return loginError(request, "UserLookup");
   }
 
   const user = (await userResponse.json()) as GitHubUser;
