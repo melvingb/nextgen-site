@@ -70,7 +70,9 @@ export function MediaManager({ branch }: { branch: string }) {
     if (!needle) return files;
 
     return files.filter((file) =>
-      `${file.name} ${file.publicPath}`.toLowerCase().includes(needle)
+      `${file.displayName} ${file.name} ${file.publicPath}`
+        .toLowerCase()
+        .includes(needle)
     );
   }, [files, query]);
 
@@ -123,7 +125,7 @@ export function MediaManager({ branch }: { branch: string }) {
     const location =
       file.source === "blob" ? "Vercel Blob" : "the GitHub repository";
 
-    if (!window.confirm(`Delete ${file.name} from ${location}?`)) return;
+    if (!window.confirm(`Delete ${file.displayName} from ${location}?`)) return;
 
     setBusy(true);
     setMessage(null);
@@ -148,8 +150,8 @@ export function MediaManager({ branch }: { branch: string }) {
         type: "success",
         text:
           file.source === "blob"
-            ? `Removed ${file.name} from Vercel Blob. No Git commit was created.`
-            : `Removed ${file.name} from GitHub.`,
+            ? `Removed ${file.displayName} from Vercel Blob. No Git commit was created.`
+            : `Removed ${file.displayName} from GitHub.`,
       });
 
       setFiles((current) =>
@@ -267,7 +269,7 @@ export function MediaManager({ branch }: { branch: string }) {
 
             <div className="admin-media-info">
               <div className="admin-media-card-head">
-                <strong>{file.name}</strong>
+                <strong title={file.name}>{file.displayName}</strong>
                 <span className={`admin-media-source ${file.source}`}>
                   {sourceLabel(file.source)}
                 </span>

@@ -57,7 +57,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             allowedContentTypes: ALLOWED_CONTENT_TYPES,
             maximumSizeInBytes: MAX_FILE_SIZE,
             validUntil,
-            addRandomSuffix: true,
+            addRandomSuffix: false,
             allowOverwrite: false,
             cacheControlMaxAge: 30 * 24 * 60 * 60,
           },

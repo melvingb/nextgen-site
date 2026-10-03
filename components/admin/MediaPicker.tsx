@@ -6,6 +6,7 @@ export type MediaLibraryFile = {
   path: string;
   publicPath: string;
   name: string;
+  displayName: string;
   size: number;
   deletable: boolean;
   source: "site" | "repository-upload" | "blob";
@@ -66,7 +67,9 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
     if (!needle) return files;
 
     return files.filter((file) =>
-      `${file.name} ${file.publicPath}`.toLowerCase().includes(needle)
+      `${file.displayName} ${file.name} ${file.publicPath}`
+        .toLowerCase()
+        .includes(needle)
     );
   }, [files, query]);
 
@@ -124,7 +127,9 @@ export function MediaPicker({ current, onSelect, onClose }: Props) {
                 <span className="admin-media-picker-thumb">
                   <img src={file.publicPath} alt="" />
                 </span>
-                <span className="admin-media-picker-name">{file.name}</span>
+                <span className="admin-media-picker-name" title={file.name}>
+                  {file.displayName}
+                </span>
                 <small>{sourceLabel(file.source)}</small>
               </button>
             ))}

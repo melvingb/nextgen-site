@@ -16,6 +16,16 @@ function sameOrigin(request: Request) {
   return !origin || origin === new URL(request.url).origin;
 }
 
+function cleanBlobDisplayName(pathname: string) {
+  const raw = pathname.split("/").pop() || pathname;
+  const withoutTimestamp = raw.replace(/^\d{13}-/, "");
+
+  return withoutTimestamp.replace(
+    /-[A-Za-z0-9_-]{16,}(?=\.[^.]+$)/,
+    ""
+  );
+}
+
 function blobErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -36,6 +46,7 @@ export async function GET() {
   try {
     const repositoryFiles = (await listSiteMedia()).map((file) => ({
       ...file,
+      displayName: file.name,
       source: file.source === "upload" ? "repository-upload" : "site",
     }));
 
@@ -43,6 +54,7 @@ export async function GET() {
       path: string;
       publicPath: string;
       name: string;
+      displayName: string;
       size: number;
       sha: string;
       deletable: boolean;
@@ -61,6 +73,7 @@ export async function GET() {
         path: blob.pathname,
         publicPath: blob.url,
         name: blob.pathname.split("/").pop() || blob.pathname,
+        displayName: cleanBlobDisplayName(blob.pathname),
         size: blob.size,
         sha: blob.etag,
         deletable: true,
