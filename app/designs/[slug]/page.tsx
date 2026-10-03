@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { designs } from "@/lib/data";
 import { getRepoActivity } from "@/lib/github";
 import { SafeImage } from "@/components/SafeImage";
+import { GitHubComments } from "@/components/GitHubComments";
 
 export function generateStaticParams() {
   return designs.map((d) => ({ slug: d.slug }));
@@ -84,6 +85,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <a href={`https://github.com/${d.repo}`} target="_blank" rel="noreferrer">Open repository →</a>
         </aside>
       </section>
+
+      <GitHubComments />
     </>
   );
 }

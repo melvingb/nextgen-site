@@ -470,3 +470,180 @@ main{min-height:60vh}
   .support-actions{align-items:stretch;flex-direction:column-reverse}
   .support-actions .button{width:100%}
 }
+
+
+/* V9 — Jekyll dark palette, glass navigation, explicit theme control, Giscus */
+html[data-theme="dark"]{
+  --bg:#0b0b0c;
+  --surface:#0b0b0c;
+  --surface-soft:#111113;
+  --surface-muted:#18181b;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --faint:#6b7280;
+  --line:#242427;
+  --line-strong:#323236;
+  --primary:#60a5fa;
+  --primary-strong:#93c5fd;
+  --primary-soft:#172033;
+  --navy:#0b0b0c;
+  --navy-2:#111113;
+  --success:#4ade80;
+  --warning:#f0b45a;
+  --shadow:0 16px 44px rgba(0,0,0,.34);
+  --shadow-soft:0 7px 20px rgba(0,0,0,.28);
+}
+
+.site-header{
+  background:color-mix(in srgb,var(--surface) 76%,transparent);
+  -webkit-backdrop-filter:saturate(155%) blur(18px);
+  backdrop-filter:saturate(155%) blur(18px);
+  border-bottom:1px solid color-mix(in srgb,var(--line) 82%,transparent);
+  box-shadow:0 8px 30px rgba(8,15,27,.035);
+}
+
+html[data-theme="dark"] .site-header{
+  background:rgba(11,11,12,.76);
+  border-bottom-color:rgba(255,255,255,.07);
+  box-shadow:0 8px 30px rgba(0,0,0,.16);
+}
+
+html[data-theme="dark"] .developer-hero,
+html[data-theme="dark"] .catalog-section,
+html[data-theme="dark"] .reviews-section,
+html[data-theme="dark"] .developer-cta,
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] .metrics-strip,
+html[data-theme="dark"] .engineering-band,
+html[data-theme="dark"] .hero:not(.developer-hero),
+html[data-theme="dark"] .contact-hero,
+html[data-theme="dark"] .project-hero,
+html[data-theme="dark"] .listing-hero,
+html[data-theme="dark"] .service-hero{
+  background-color:var(--bg);
+}
+
+html[data-theme="dark"] .capability-card,
+html[data-theme="dark"] .project-card,
+html[data-theme="dark"] .portfolio-card,
+html[data-theme="dark"] .repo-card,
+html[data-theme="dark"] .service-card,
+html[data-theme="dark"] .extension-product-card,
+html[data-theme="dark"] .contact-brief,
+html[data-theme="dark"] .refined-contact-layout .contact-form,
+html[data-theme="dark"] .dev-panel,
+html[data-theme="dark"] .browser-frame,
+html[data-theme="dark"] .service-profile,
+html[data-theme="dark"] .listing-hero-note{
+  background:#18181b;
+}
+
+html[data-theme="dark"] .project-image,
+html[data-theme="dark"] .portfolio-image-wrap,
+html[data-theme="dark"] .image-fallback,
+html[data-theme="dark"] .visual-placeholder{
+  background-color:#141416;
+}
+
+.theme-control{
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border:1px solid var(--line-strong);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);
+  box-shadow:0 3px 12px rgba(10,20,36,.04);
+}
+
+.theme-control button{
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--faint);
+  cursor:pointer;
+  transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+
+.theme-control button:hover{
+  color:var(--text);
+}
+
+.theme-control button.active{
+  background:var(--surface-muted);
+  color:var(--text);
+  box-shadow:0 1px 4px rgba(10,20,36,.10);
+}
+
+html[data-theme="dark"] .theme-control{
+  background:rgba(24,24,27,.72);
+  border-color:#2f2f33;
+}
+
+html[data-theme="dark"] .theme-control button.active{
+  background:#2a2a2e;
+  color:#fff;
+  box-shadow:none;
+}
+
+.theme-control svg{
+  width:15px;
+  height:15px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.github-comments{
+  padding-top:18px;
+  padding-bottom:96px;
+  border-top:1px solid var(--line);
+}
+
+.github-comments-heading{
+  display:grid;
+  grid-template-columns:.72fr 1.28fr;
+  gap:72px;
+  align-items:end;
+  padding:38px 0 24px;
+}
+
+.github-comments-heading h2{
+  margin:8px 0 0;
+  font-size:clamp(1.7rem,2.6vw,2.2rem);
+  line-height:1.08;
+  letter-spacing:-.04em;
+}
+
+.github-comments-heading p{
+  max-width:560px;
+  margin:0;
+  color:var(--muted);
+  font-size:.8rem;
+  line-height:1.6;
+}
+
+.giscus-container,
+.giscus,
+.giscus-frame{
+  width:100%;
+}
+
+.giscus-container{
+  min-height:180px;
+}
+
+@media (max-width:760px){
+  .theme-control{height:32px}
+  .theme-control button{width:25px;height:25px}
+  .github-comments{padding-bottom:70px}
+  .github-comments-heading{grid-template-columns:1fr;gap:12px;padding:30px 0 20px}
+}

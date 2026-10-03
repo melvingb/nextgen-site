@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { extensions } from "@/lib/data";
 import { getRepoActivity } from "@/lib/github";
 import { SafeImage } from "@/components/SafeImage";
+import { GitHubComments } from "@/components/GitHubComments";
 
 export function generateStaticParams() {
   return extensions.map((extension) => ({ slug: extension.slug }));
@@ -123,6 +124,8 @@ export default async function Page({
           </div>
         </section>
       )}
+
+      <GitHubComments />
     </>
   );
 }
