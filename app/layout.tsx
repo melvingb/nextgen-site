@@ -1,8 +1,6 @@
 import type {Metadata} from "next";
 import "./globals.css";
-import {Header} from "@/components/Header";
-import {Footer} from "@/components/Footer";
-import {Support} from "@/components/Support";
+import {PublicChrome} from "@/components/PublicChrome";
 import {JsonLd} from "@/components/JsonLd";
 import {site} from "@/lib/site";
 
@@ -16,4 +14,13 @@ export const metadata: Metadata = {
   icons:{icon:"/assets/favicon/favicon.ico",apple:"/assets/favicon/apple-touch-icon.png"}
 };
 
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" suppressHydrationWarning><body><JsonLd data={{"@context":"https://schema.org","@type":"Organization",name:site.name,url:site.url,sameAs:[site.github]}}/><Header/><main>{children}</main><Footer/><Support/></body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <JsonLd data={{"@context":"https://schema.org","@type":"Organization",name:site.name,url:site.url,sameAs:[site.github]}}/>
+        <PublicChrome>{children}</PublicChrome>
+      </body>
+    </html>
+  );
+}
