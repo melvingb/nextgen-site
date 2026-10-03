@@ -10,24 +10,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/admin/login",
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider !== "github") return false;
+    async jwt({ token, account, profile }) {
+      if (account?.provider === "github") {
+        const githubId = String(
+          (profile as { id?: string | number } | undefined)?.id ??
+          account.providerAccountId ??
+          ""
+        ).trim();
 
-      const githubId = String(
-        (profile as { id?: string | number } | undefined)?.id ??
-        account.providerAccountId ??
-        ""
-      ).trim();
+        token.isAdmin = githubId === ADMIN_GITHUB_USER_ID;
+        token.githubId = githubId;
+      }
 
-      if (githubId === ADMIN_GITHUB_USER_ID) return true;
+      return token;
+    },
+    async session({ session, token }) {
+      (session as typeof session & { isAdmin?: boolean; githubId?: string }).isAdmin =
+        token.isAdmin === true;
+      (session as typeof session & { isAdmin?: boolean; githubId?: string }).githubId =
+        typeof token.githubId === "string" ? token.githubId : undefined;
 
-      const adminLogin = process.env.ADMIN_GITHUB_LOGIN?.trim().toLowerCase();
-      const githubLogin =
-        typeof (profile as { login?: unknown } | undefined)?.login === "string"
-          ? String((profile as { login: string }).login).trim().toLowerCase()
-          : "";
-
-      return Boolean(adminLogin && githubLogin && adminLogin === githubLogin);
+      return session;
     },
   },
 });
