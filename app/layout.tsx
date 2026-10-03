@@ -1,8 +1,16 @@
 import type {Metadata} from "next";
+import { Advent_Pro } from "next/font/google";
 import "./globals.css";
 import {PublicChrome} from "@/components/PublicChrome";
 import {JsonLd} from "@/components/JsonLd";
 import {site} from "@/lib/site";
+
+const adventPro = Advent_Pro({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-brand",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase:new URL(site.url),
@@ -17,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({children}:{children:React.ReactNode}){
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className={adventPro.variable}>
         <JsonLd data={{"@context":"https://schema.org","@type":"Organization",name:site.name,url:site.url,sameAs:[site.github]}}/>
         <PublicChrome>{children}</PublicChrome>
       </body>
