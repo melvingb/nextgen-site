@@ -24,7 +24,7 @@ const definitions: Record<ContentKind, {
       {key:"slug",label:"Slug",help:"Used in /designs/[slug]."},
       {key:"title",label:"Title"},
       {key:"description",label:"Short description",type:"textarea"},
-      {key:"image",label:"Cover image path",placeholder:"/assets/images/example.jpg"},
+      {key:"image",label:"Cover image",type:"media",placeholder:"/assets/images/example.jpg"},
       {key:"tags",label:"Tags",type:"tags",help:"Comma-separated."},
       {key:"repo",label:"GitHub repository",placeholder:"owner/repository"},
       {key:"demoStyle",label:"Demo style key"},
@@ -40,7 +40,7 @@ const definitions: Record<ContentKind, {
       {key:"slug",label:"Slug"},
       {key:"title",label:"Title"},
       {key:"description",label:"Description",type:"textarea"},
-      {key:"image",label:"Cover image path"},
+      {key:"image",label:"Cover image",type:"media"},
       {key:"platform",label:"Platform",defaultValue:"phpBB"},
       {key:"status",label:"Status",defaultValue:"Development"},
       {key:"version",label:"Version"},
@@ -58,7 +58,7 @@ const definitions: Record<ContentKind, {
     fields: [
       {key:"name",label:"Project name"},
       {key:"description",label:"Description",type:"textarea"},
-      {key:"image",label:"Image path"},
+      {key:"image",label:"Project image",type:"media"},
     ],
   },
   testimonials: {

@@ -3,7 +3,7 @@ import { getAdminSession } from "@/lib/admin-session";
 import {
   deleteRepositoryFile,
   getPublishingBranch,
-  listUploadedMedia,
+  listSiteMedia,
   writeRepositoryBinary,
 } from "@/lib/github-admin";
 
@@ -36,7 +36,7 @@ export async function GET() {
   }
 
   try {
-    const files = await listUploadedMedia();
+    const files = await listSiteMedia();
     return NextResponse.json({ files, branch: getPublishingBranch() });
   } catch (error) {
     return NextResponse.json(

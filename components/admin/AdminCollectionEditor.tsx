@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MediaPicker } from "@/components/admin/MediaPicker";
 
 export type AdminField = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "tags" | "lines";
+  type?: "text" | "textarea" | "number" | "tags" | "lines" | "media";
   placeholder?: string;
   help?: string;
   defaultValue?: string | number | string[];
@@ -27,10 +28,7 @@ function itemLabel(item: Record<string, unknown>, index: number) {
   return String(item.title || item.name || item.slug || `Item ${index + 1}`);
 }
 
-function previewHref(
-  item: Record<string, unknown>,
-  previewBase?: string
-) {
+function previewHref(item: Record<string, unknown>, previewBase?: string) {
   if (!previewBase) return "";
   const slug = String(item.slug || "");
   if (!slug) return previewBase;
@@ -52,8 +50,9 @@ export function AdminCollectionEditor({
   const [selected, setSelected] = useState(initialItems.length ? 0 : -1);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [message, setMessage] = useState(
-    loadError ? { type: "error", text: loadError } : null as null | {type:"error"|"success";text:string}
+  const [mediaField, setMediaField] = useState<AdminField | null>(null);
+  const [message, setMessage] = useState<null | { type: "error" | "success"; text: string }>(
+    loadError ? { type: "error", text: loadError } : null
   );
 
   const current = selected >= 0 ? items[selected] : null;
@@ -101,9 +100,7 @@ export function AdminCollectionEditor({
 
   function removeItem() {
     if (selected < 0 || !current) return;
-    if (!window.confirm(`Remove "${itemLabel(current, selected)}" from this collection?`)) {
-      return;
-    }
+    if (!window.confirm(`Remove "${itemLabel(current, selected)}" from this collection?`)) return;
 
     const next = items.filter((_, index) => index !== selected);
     setItems(next);
@@ -129,17 +126,13 @@ export function AdminCollectionEditor({
       setItems(data.items);
       setDirty(false);
 
-      if (data.changed === false) {
-        setMessage({
-          type: "success",
-          text: `No changes to publish. ${data.branch} is already up to date.`,
-        });
-      } else {
-        setMessage({
-          type: "success",
-          text: `Published commit ${String(data.sha || "").slice(0, 7)} to ${data.branch}. Vercel will redeploy automatically.`,
-        });
-      }
+      setMessage({
+        type: "success",
+        text:
+          data.changed === false
+            ? `No changes to publish. ${data.branch} is already up to date.`
+            : `Published commit ${String(data.sha || "").slice(0, 7)} to ${data.branch}. Vercel will redeploy automatically.`,
+      });
     } catch (error) {
       setMessage({
         type: "error",
@@ -206,13 +199,9 @@ export function AdminCollectionEditor({
                 </div>
                 <div className="admin-action-row">
                   {currentPreview && (
-                    <a href={currentPreview} target="_blank" rel="noreferrer">
-                      Preview ↗
-                    </a>
+                    <a href={currentPreview} target="_blank" rel="noreferrer">Preview ↗</a>
                   )}
-                  <button className="danger" type="button" onClick={removeItem}>
-                    Remove
-                  </button>
+                  <button className="danger" type="button" onClick={removeItem}>Remove</button>
                   <button
                     className="primary"
                     type="button"
@@ -233,6 +222,31 @@ export function AdminCollectionEditor({
                       : field.type === "lines"
                         ? Array.isArray(rawValue) ? rawValue.join("\n") : ""
                         : String(rawValue ?? "");
+
+                  if (field.type === "media") {
+                    return (
+                      <div className="admin-media-field wide" key={field.key}>
+                        <span className="admin-field-label">{field.label}</span>
+                        <div className="admin-media-field-row">
+                          <div className="admin-media-field-preview">
+                            {value ? <img src={value} alt="" /> : <span>No image selected</span>}
+                          </div>
+                          <div className="admin-media-field-controls">
+                            <input
+                              type="text"
+                              value={value}
+                              placeholder={field.placeholder}
+                              onChange={(event) => updateField(field, event.target.value)}
+                            />
+                            <button type="button" onClick={() => setMediaField(field)}>
+                              Choose image
+                            </button>
+                            {field.help && <small>{field.help}</small>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
 
                   return (
                     <label
@@ -270,6 +284,14 @@ export function AdminCollectionEditor({
           )}
         </section>
       </div>
+
+      {mediaField && current && (
+        <MediaPicker
+          current={String(current[mediaField.key] ?? "")}
+          onSelect={(path) => updateField(mediaField, path)}
+          onClose={() => setMediaField(null)}
+        />
+      )}
     </main>
   );
 }

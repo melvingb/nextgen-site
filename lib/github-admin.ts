@@ -351,7 +351,7 @@ async function getBranchTreeSha() {
   return commitData.tree.sha;
 }
 
-export async function listUploadedMedia() {
+export async function listSiteMedia() {
   const treeSha = await getBranchTreeSha();
   const response = await github(
     `/repos/${getRepository()}/git/trees/${treeSha}?recursive=1`
@@ -366,7 +366,8 @@ export async function listUploadedMedia() {
     .filter(
       (item) =>
         item.type === "blob" &&
-        item.path.startsWith("public/assets/images/uploads/")
+        item.path.startsWith("public/assets/images/") &&
+        /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(item.path)
     )
     .map((item) => ({
       path: item.path,
@@ -374,8 +375,13 @@ export async function listUploadedMedia() {
       name: item.path.split("/").pop() || item.path,
       size: item.size ?? 0,
       sha: item.sha,
+      deletable: item.path.startsWith("public/assets/images/uploads/"),
+      source: item.path.startsWith("public/assets/images/uploads/") ? "upload" : "site",
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => {
+      if (a.source !== b.source) return a.source === "upload" ? -1 : 1;
+      return a.publicPath.localeCompare(b.publicPath);
+    });
 }
 
 export async function getPublishingStatus() {
