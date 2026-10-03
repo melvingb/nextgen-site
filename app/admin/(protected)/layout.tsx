@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth, signOut } from "@/auth";
+import { getAdminSession } from "@/lib/admin-session";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  const adminSession = session as (typeof session & { isAdmin?: boolean }) | null;
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getAdminSession();
 
-  if (!session?.user) redirect("/admin/login");
-  if (!adminSession?.isAdmin) redirect("/admin/login?error=AccessDenied");
+  if (!session) redirect("/admin/login");
 
   return (
     <div className="admin-shell">
@@ -16,6 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="brand-mark">N</span>
           <span>nextgen <b>admin</b></span>
         </Link>
+
         <nav className="admin-nav" aria-label="Admin navigation">
           <Link href="/admin">Overview</Link>
           <span>Designs <small>soon</small></span>
@@ -24,21 +27,39 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span>Testimonials <small>soon</small></span>
           <span>Media <small>soon</small></span>
         </nav>
+
         <div className="admin-sidebar-footer">
           <div className="admin-user">
-            {session.user.image ? <img src={session.user.image} alt="" /> : <span className="admin-user-avatar">A</span>}
-            <div><strong>{session.user.name ?? "Administrator"}</strong><span>GitHub authenticated</span></div>
+            {session.avatarUrl ? (
+              <img src={session.avatarUrl} alt="" />
+            ) : (
+              <span className="admin-user-avatar">A</span>
+            )}
+            <div>
+              <strong>{session.login}</strong>
+              <span>GitHub authenticated</span>
+            </div>
           </div>
-          <form action={async () => {"use server"; await signOut({ redirectTo: "/admin/login" });}}>
-            <button type="submit" className="admin-signout">Sign out</button>
+
+          <form action="/api/auth/signout" method="post">
+            <button type="submit" className="admin-signout">
+              Sign out
+            </button>
           </form>
         </div>
       </aside>
+
       <div className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-topbar-label">Content workspace</span><strong>nextgen-site</strong></div>
-          <a href="/" target="_blank" rel="noreferrer">View site ↗</a>
+          <div>
+            <span className="admin-topbar-label">Content workspace</span>
+            <strong>nextgen-site</strong>
+          </div>
+          <a href="/" target="_blank" rel="noreferrer">
+            View site ↗
+          </a>
         </header>
+
         {children}
       </div>
     </div>
